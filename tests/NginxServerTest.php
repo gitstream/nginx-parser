@@ -17,7 +17,7 @@ class NginxServerTest extends BaseTest
 
         $this->assertInternalType('array', $conf->children);
 
-        $this->assertEquals(count($conf->children), 1);
+        $this->assertEquals(2, count($conf->children));
 
         $this->assertInstanceOf('gitstream\parser\nginx\Block', $conf->children[0]);
 
@@ -72,5 +72,40 @@ class NginxServerTest extends BaseTest
 
         $this->assertEquals('include', $blockLocationPHP[4]->name);
         $this->assertEquals('fastcgi_params', $blockLocationPHP[4]->value);
+    }
+
+    public function testSSL()
+    {
+        $conf = $this->getData();
+
+        $this->assertInstanceOf('gitstream\parser\nginx\Block', $conf->children[1]);
+
+        $httpsServer = $conf->children[1]->children;
+        $this->assertEquals(12, count($httpsServer));
+
+        $this->assertEquals('ssl', $httpsServer[4]->name);
+        $this->assertEquals('on', $httpsServer[4]->value);
+
+        $this->assertEquals('ssl_certificate', $httpsServer[5]->name);
+        $this->assertEquals('cert.pem', $httpsServer[5]->value);
+
+        $this->assertEquals('ssl_protocols', $httpsServer[8]->name);
+        $this->assertEquals(['SSLv3', 'TLSv1'], $httpsServer[8]->value);
+
+        $this->assertEquals('ssl_ciphers', $httpsServer[9]->name);
+        $this->assertEquals('ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP', $httpsServer[9]->value);
+
+        $this->assertEquals('ssl_prefer_server_ciphers', $httpsServer[10]->name);
+        $this->assertEquals('on', $httpsServer[10]->value);
+
+        $this->assertInstanceOf('gitstream\parser\nginx\Block', $httpsServer[11]);
+
+        $this->assertEquals('location', $httpsServer[11]->name);
+        $this->assertEquals('/', $httpsServer[11]->value);
+
+        $httpsServerLocation = $httpsServer[11]->children;
+
+        $this->assertEquals('try_files', $httpsServerLocation[0]->name);
+        $this->assertEquals(['$uri', '$uri/', '/index.html'], $httpsServerLocation[0]->value);
     }
 }
