@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gitstream/nginx-parser.svg)](https://travis-ci.org/gitstream/nginx-parser)
+
 Nginx parser
 ============
 
